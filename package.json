@@ -1,0 +1,17 @@
+{
+  "name": "mightyenginev2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "vite": "^6.2.2"
+  },
+  "dependencies": {
+    "three": "^0.174.0"
+  }
+}
