@@ -5,8 +5,12 @@ export function loadModel(url) {
         globals.loader.load(
             url,
             (gltf) => {
+                gltf.scene.traverse(node => {
+                    if(node.isMesh)
+                        node.castShadow = true;
+                })
                 globals.scene.add(gltf.scene);
-                resolve();
+                resolve(gltf.scene);
             },
             undefined,
             (error) => reject(error)

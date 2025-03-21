@@ -1,3 +1,5 @@
+import { globals } from "./globals";
+
 export function setupEventListeners(renderer, controls) {
     renderer.domElement.addEventListener("click", () => {
         renderer.domElement.requestPointerLock();
