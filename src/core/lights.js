@@ -6,7 +6,7 @@ export function setupLights() {
     light.position.set(new THREE.Vector3(0, 0, 0));
     light.castShadow = true;
     light.scale.set(new THREE.Vector3(10, 10, 10));
-    light.target = globals.playerModel;
+    light.target = globals.gameScene.playerModel;
 
     const shadowCamera = light.shadow.camera;
     const size = globals.shadow.size;
@@ -17,13 +17,12 @@ export function setupLights() {
     shadowCamera.near = 0.1;
     shadowCamera.far = 100;
     shadowCamera.updateProjectionMatrix();
-    light.shadow.mapSize.width = globals.shadow.mapSize.width; 
+    light.shadow.mapSize.width = globals.shadow.mapSize.width;
     light.shadow.mapSize.height = globals.shadow.mapSize.height;
+    globals.light.directionalGlobalLight = light;
+    globals.gameScene.scene.add(light);
 
-
-    globals.light = { directionalGlobalLight: light };
-    globals.scene.add(light);
-
-    light = new THREE.HemisphereLight();
-    globals.scene.add(light);
+    light = new THREE.HemisphereLight(0x9ec3ff, 0xffed7a);
+    globals.light.hemisphere = light;
+    globals.gameScene.scene.add(light);
 }

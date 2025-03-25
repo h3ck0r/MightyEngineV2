@@ -19,15 +19,16 @@ export class Inputs {
     }
 
     setupControls() {
-        this.topLook = location.hash.indexOf('top') !== -1;
-        if (this.topLook) {
-            globals.camera.camera.position.set(10, 10, 20);
+        this.directLook = location.hash.indexOf('direct') !== -1;
+        if (this.directLook) {
+            this.movementControl = this.fpsControl;
+            globals.controls = new PointerLockControls(globals.camera.camera, globals.renderer.domElement);
+
+        } else {
+            globals.camera.camera.position.set(0, 10, 20);
             globals.camera.camera.rotation.set(-Math.PI / 2, 0, 0);
             this.movementControl = this.topControl;
 
-            globals.controls = new PointerLockControls(globals.camera.camera, globals.renderer.domElement);
-        } else {
-            this.movementControl = this.fpsControl;
             globals.controls = new PointerLockControls(globals.camera.camera, globals.renderer.domElement);
         }
     }
@@ -40,7 +41,7 @@ export class Inputs {
 
     onWheel(event) {
         this.zoomAmount += event.deltaY * 0.1;
-        const yZoomVal = globals.playerModel.position.y + this.zoomAmount;
+        const yZoomVal = globals.gameScene.playerModel.position.y + this.zoomAmount;
         if (yZoomVal < globals.movement.minZoom) {
             this.zoomAmount = globals.movement.minZoom;
         }
@@ -81,18 +82,18 @@ export class Inputs {
 
 
         if (globals.camera.moveLeft) {
-            globals.playerModel.rotation.y += globals.movement.rotationSpeed;
+            globals.gameScene.playerModel.rotation.y += globals.movement.rotationSpeed;
 
         }
         if (globals.camera.moveRight) {
-            globals.playerModel.rotation.y -= globals.movement.rotationSpeed;
+            globals.gameScene.playerModel.rotation.y -= globals.movement.rotationSpeed;
 
         }
 
 
-        const rotationQuaternion = globals.playerModel.rotation instanceof THREE.Euler
-            ? new THREE.Quaternion().setFromEuler(globals.playerModel.rotation)
-            : globals.playerModel.rotation;
+        const rotationQuaternion = globals.gameScene.playerModel.rotation instanceof THREE.Euler
+            ? new THREE.Quaternion().setFromEuler(globals.gameScene.playerModel.rotation)
+            : globals.gameScene.playerModel.rotation;
 
 
         if (globals.camera.moveForward) {
@@ -100,11 +101,11 @@ export class Inputs {
             moveDirection.lerp(forward, 0.9);
             isMoving = true;
             if (globals.camera.speedUp && this.currentAnimation !== 'Run') {
-                playAnimation(globals.playerModel, 'Run', 0.3);
+                playAnimation(globals.gameScene.playerModel, 'Run', 0.3);
                 this.currentAnimation = 'Run';
             }
             else if (!globals.camera.speedUp && this.currentAnimation !== 'Walk') {
-                playAnimation(globals.playerModel, 'Walk', 0.3);
+                playAnimation(globals.gameScene.playerModel, 'Walk', 0.3);
                 this.currentAnimation = 'Walk';
             }
         }
@@ -113,7 +114,7 @@ export class Inputs {
             moveDirection.add(backward);
             isMoving = true;
             if (this.currentAnimation !== 'WalkBack') {
-                playAnimation(globals.playerModel, 'WalkBack', 0.3);
+                playAnimation(globals.gameScene.playerModel, 'WalkBack', 0.3);
                 this.currentAnimation = 'WalkBack';
             }
         }
@@ -121,12 +122,12 @@ export class Inputs {
         if (!isMoving) {
             if (Date.now() - this.lastInputTime > this.longIdleTimeout) {
                 if (this.currentAnimation !== 'LongIdle') {
-                    playAnimation(globals.playerModel, 'LongIdle', 0.3);
+                    playAnimation(globals.gameScene.playerModel, 'LongIdle', 0.3);
                     this.currentAnimation = 'LongIdle';
                 }
             }
             else if (this.currentAnimation !== 'Idle') {
-                playAnimation(globals.playerModel, 'Idle', 0.3);
+                playAnimation(globals.gameScene.playerModel, 'Idle', 0.3);
                 this.currentAnimation = 'Idle';
             }
 
@@ -141,23 +142,23 @@ export class Inputs {
     topControl(moveDirection, delta) {
         const speed = globals.camera.speedUp ? globals.movement.fastSpeed : globals.movement.movementSpeed;
 
-        globals.playerModel.position.x += moveDirection.x * speed * delta;
-        globals.playerModel.position.y += moveDirection.y * speed * delta;
-        globals.playerModel.position.z += moveDirection.z * speed * delta;
+        globals.gameScene.playerModel.position.x += moveDirection.x * speed * delta;
+        globals.gameScene.playerModel.position.y += moveDirection.y * speed * delta;
+        globals.gameScene.playerModel.position.z += moveDirection.z * speed * delta;
 
         const directionalLightPosition = new THREE.Vector3(
-            globals.playerModel.position.x + 20,
-            globals.playerModel.position.y + 20,
-            globals.playerModel.position.z + 10
+            globals.gameScene.playerModel.position.x + 20 + globals.light.globalOffset.x,
+            globals.gameScene.playerModel.position.y + 20 + globals.light.globalOffset.y,
+            globals.gameScene.playerModel.position.z + 10 + globals.light.globalOffset.z
         );
         globals.light.directionalGlobalLight.position.copy(directionalLightPosition);
         const targetCameraPosition = new THREE.Vector3(
-            globals.playerModel.position.x + this.zoomAmount,
-            globals.playerModel.position.y + this.zoomAmount,
-            globals.playerModel.position.z + 10
+            globals.gameScene.playerModel.position.x + this.zoomAmount,
+            globals.gameScene.playerModel.position.y + this.zoomAmount,
+            globals.gameScene.playerModel.position.z + 10
         );
         globals.camera.camera.position.lerp(targetCameraPosition, 0.01);
-        globals.camera.camera.lookAt(globals.playerModel.position);
+        globals.camera.camera.lookAt(globals.gameScene.playerModel.position);
     }
 
     fpsControl(moveDirection, speed) {
