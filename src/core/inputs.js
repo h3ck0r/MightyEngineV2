@@ -160,11 +160,29 @@ export class Inputs {
         globals.camera.camera.lookAt(globals.gameScene.playerModel.position);
     }
 
-    fpsControl(moveDirection, speed) {
-        globals.camera.direction.normalize();
-        globals.camera.camera.translateX((globals.camera.direction.x + moveDirection.x) * speed);
-        globals.camera.camera.translateY((globals.camera.direction.y + moveDirection.y) * speed);
-        globals.camera.camera.translateZ((globals.camera.direction.z + moveDirection.z) * speed);
+    fpsControl(moveDirection, delta) {
+        const speed = globals.camera.speedUp ? globals.movement.fastSpeed : globals.movement.movementSpeed;
 
+        let direction = new THREE.Vector3();
+        globals.camera.camera.getWorldDirection(direction);
+
+        let right = new THREE.Vector3().crossVectors(direction, new THREE.Vector3(0, 1, 0)).normalize();
+        let up = new THREE.Vector3(0, 1, 0);
+
+        let velocity = new THREE.Vector3();
+        const directionalLightPosition = new THREE.Vector3(
+            globals.gameScene.playerModel.position.x + 20 + globals.light.globalOffset.x,
+            globals.gameScene.playerModel.position.y + 20 + globals.light.globalOffset.y,
+            globals.gameScene.playerModel.position.z + 10 + globals.light.globalOffset.z
+        );
+        globals.light.directionalGlobalLight.position.copy(directionalLightPosition);
+        if (globals.camera.moveForward) velocity.addScaledVector(direction, speed * delta);
+        if (globals.camera.moveBackward) velocity.addScaledVector(direction, -speed * delta);
+        if (globals.camera.moveLeft) velocity.addScaledVector(right, -speed * delta);
+        if (globals.camera.moveRight) velocity.addScaledVector(right, speed * delta);
+        if (globals.camera.moveUp) velocity.addScaledVector(up, speed * delta);
+        if (globals.camera.speedUp) velocity.multiplyScalar(2); 
+
+        globals.camera.camera.position.add(velocity);
     }
 }

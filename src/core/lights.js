@@ -20,11 +20,11 @@ export function setupLights() {
     shadowCamera.updateProjectionMatrix();
     light.shadow.mapSize.width = globals.shadow.mapSize.width;
     light.shadow.mapSize.height = globals.shadow.mapSize.height;
-    light.color = new THREE.Color(0xff9191);
+    light.color = new THREE.Color(globals.light.globalColorLight);
     globals.light.directionalGlobalLight = light;
     globals.gameScene.scene.add(light);
 
-    light = new THREE.HemisphereLight(0xff9191, 0xffbcbc);
+    light = new THREE.HemisphereLight(globals.light.globalHemisphereTopColor, globals.light.globalHemisphereBottomColor);
     globals.light.hemisphere = light;
     globals.gameScene.scene.add(light);
 }

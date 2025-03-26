@@ -55,13 +55,10 @@ export async function generateBush() {
     const alphaMap = await textureLoader.loadAsync('/textures/bushAlpha.webp');
 
     const material = new THREE.MeshStandardMaterial({
-        color: 0xbdeb34,
-        // side: THREE.DoubleSide,
+        color: 0xa5ff1f,
         alphaMap: alphaMap,
-        // transparent: true,
-        // opacity: 1.0,
+        side: THREE.DoubleSide,
         alphaTest: 0.1,
-        depthTest: true,
         depthWrite: true,
     });
     const perlinUV = positionWorld.xz.mul(1).add(sin(time).mul(0.2));
@@ -82,11 +79,8 @@ export async function generateBush() {
 
     return highLODMesh;
 }
-export async function generateBushes() {
+export async function generateBushes(count, maxRange) {
     const bushPrototype = await generateBush();
-    const count = 100;
-    const range = 100;
-
     const bushGeometry = bushPrototype.geometry;
     const bushMaterial = bushPrototype.material;
     const instancedMesh = new THREE.InstancedMesh(bushGeometry, bushMaterial, count);
@@ -94,8 +88,8 @@ export async function generateBushes() {
     const matrix = new THREE.Matrix4();
 
     for (let i = 0; i < count; i++) {
-        const x = Math.random() * range - range / 2;
-        const z = Math.random() * range - range / 2;
+        const x = Math.random() * (maxRange + maxRange) - maxRange - 20;
+        const z = Math.random() * (maxRange + maxRange) - maxRange - 20;
         const y = 1 - (Math.random() * 0.5);
 
         const rotationX = Math.random() * Math.PI * 2;

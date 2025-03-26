@@ -2,12 +2,9 @@ import { THREE, uniform, smoothstep, Fn, mix, mergeGeometries, uv, sin, texture,
 
 import { globals } from '../core/globals';
 
-const cameraPos = uniform(globals.camera.camera.position);
 
-
-
-export async function generateGrass(count = 100000, maxRange = 50) {
-    const grassGeometry = new THREE.PlaneGeometry(2, 1.5);
+export async function generateGrass(count = 1000000, maxRange = 100) {
+    const grassGeometry = new THREE.PlaneGeometry(3, 1.5);
     const alphaMap = new THREE.TextureLoader().load('textures/grassAlpha.webp');
     const grassMaterial = new THREE.MeshStandardMaterial({
         alphaMap: alphaMap,
@@ -19,8 +16,8 @@ export async function generateGrass(count = 100000, maxRange = 50) {
         depthTest: true,
     });
     const bottomColor = new THREE.Color(0x8fc906);
-    const middleColor = new THREE.Color(0xb5f029);
-    const topColor = new THREE.Color(0xdaff82);
+    const middleColor = new THREE.Color(0x6ee657);
+    const topColor = new THREE.Color(0xdbffd4);
 
     const middleBlend = smoothstep(0.0, 0.5, positionWorld.y);
 
@@ -60,6 +57,6 @@ export async function generateGrass(count = 100000, maxRange = 50) {
 }
 
 export function updateGrassPosition(grassMesh) {
-    cameraPos.value.copy(globals.camera.camera.position);
+    // cameraPos.value.copy(globals.camera.camera.position);
     // grassMesh.position.set(globals.gameScene.playerModel.position.x, 0, globals.gameScene.playerModel.position.z);
 }

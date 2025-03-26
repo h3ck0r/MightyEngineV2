@@ -6,29 +6,24 @@ import { setupEventListeners } from './eventListeners.js';
 import { Debug } from '../utils/debug.js';
 import { Inputs } from './inputs.js';
 import { GameScene } from './gameScene.js';
+import { Camera } from './camera.js';
 
 export class Engine {
     constructor() {
         this.animate = this.animate.bind(this);
 
-        globals.renderer = new THREE.WebGPURenderer({ antialias: true });
-        globals.renderer.toneMapping = THREE.AgXToneMapping;
-        globals.renderer.setPixelRatio(window.devicePixelRatio);
-        globals.renderer.setSize(window.innerWidth, window.innerHeight);
-        globals.renderer.shadowMap.enabled = true;
-        globals.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        globals.gameScene = new GameScene();
-
-        const mesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(1000, 1000),
-            new THREE.MeshStandardMaterial({ color: 0xa8fc0d }));
-        mesh.rotation.x = - Math.PI / 2;
-        mesh.receiveShadow = true;
-        globals.gameScene.scene.add(mesh);
-
-        
-        globals.camera.camera.far = 120;
+        const renderer = new THREE.WebGPURenderer({ antialias: true });
+        renderer.toneMapping = THREE.AgXToneMapping;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        globals.renderer = renderer;
         document.body.appendChild(globals.renderer.domElement);
+
+        globals.gameScene = new GameScene();
+        globals.camera = new Camera();
+        
     }
 
 
@@ -41,7 +36,9 @@ export class Engine {
             .catch((error) => {
                 console.error("Failed to load texture:", error);
             });
+
         const ktx2Loader = new KTX2Loader();
+        
         ktx2Loader.setTranscoderPath("/libs/basis/");
         ktx2Loader.detectSupport(globals.renderer);
         ktx2Loader.setWorkerLimit(navigator.hardwareConcurrency || 4);
@@ -51,6 +48,7 @@ export class Engine {
         await globals.gameScene.loadScene();
         setupEventListeners(globals.renderer, globals.controls);
         setupLights();
+        
         this.inputs = new Inputs();
         this.debug = new Debug();
         globals.renderer.setAnimationLoop(this.animate);
@@ -66,7 +64,5 @@ export class Engine {
         if (globals.isDebug) {
             globals.stats.update();
         }
-
-        // this.postProcessing.renderAsync(globals.gameScene.scene, globals.camera.camera)
     }
 }

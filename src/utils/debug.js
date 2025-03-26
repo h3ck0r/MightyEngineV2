@@ -54,11 +54,8 @@ export class Debug {
             globals.light.globalOffset.x = x;
             globals.light.globalOffset.y = y;
         });
-        PARAMS = {
-            topColor: '#9ec3ff',
-        };
 
-        folder.addBinding({ globalLightColor: "#ff9191" }, 'globalLightColor', {
+        folder.addBinding({ globalLightColor: `#${globals.light.globalColorLight.toString(16).padStart(6, '0')}` }, 'globalLightColor', {
             picker: 'inline',
         }).on('change', (e) => {
             const hexColor = e.value.replace('#', '');
@@ -67,22 +64,21 @@ export class Debug {
             globals.light.directionalGlobalLight.color = new THREE.Color(colorValue);
         });
 
-        folder.addBinding(PARAMS, 'topColor', {
+        folder.addBinding({
+            topColor: `#${globals.light.globalHemisphereTopColor.toString(16).padStart(6, '0')}`
+        }, 'topColor', {
             picker: 'inline',
         }).on('change', (e) => {
-            const hexColor = e.value.replace('#ff9191', '');
+            const hexColor = e.value.replace('#', '');
             const colorValue = parseInt(hexColor.substring(0, 6), 16);
 
             globals.light.hemisphere.color = new THREE.Color(colorValue);
         });
 
-        PARAMS = {
-            bottomColor: '#ffed7a',
-        };
-        folder.addBinding(PARAMS, 'bottomColor', {
+        folder.addBinding({ bottomColor: `#${globals.light.globalHemisphereBottomColor.toString(16).padStart(6, '0')}` }, 'bottomColor', {
             picker: 'inline',
         }).on('change', (e) => {
-            const hexColor = e.value.replace('#ffbcbc', '');
+            const hexColor = e.value.replace('#', '');
             const colorValue = parseInt(hexColor.substring(0, 6), 16);
 
             globals.light.hemisphere.groundColor = new THREE.Color(colorValue);
