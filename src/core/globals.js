@@ -1,6 +1,5 @@
-import * as THREE from 'three/webgpu';
+import { THREE } from '../imports/imports';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { KTX2Loader } from 'three/examples/jsm/Addons.js';
 
 export const globals = {
     camera: {
@@ -23,14 +22,14 @@ export const globals = {
     shadow: {
         size: 25,
         mapSize: {
-            width: 4096,
-            height: 4096
+            width: 2048,
+            height: 2048
         }
     },
     light: {
         globalOffset: {
-            x: 0,
-            y: 0,
+            x: 9,
+            y: -10,
             z: 0
         }
     },
@@ -38,6 +37,5 @@ export const globals = {
     clock: new THREE.Clock(),
     loader: new GLTFLoader(),
     textureLoader: new THREE.TextureLoader(),
-    ktxLoader: new KTX2Loader(),
     mixers: []
 }

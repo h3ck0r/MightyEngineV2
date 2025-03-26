@@ -1,6 +1,5 @@
 
-
-import { AnimationMixer } from 'three';
+import { AnimationMixer } from '../imports/imports.js';
 import { globals } from '../core/globals';
 
 
@@ -10,7 +9,6 @@ export function loadModel(url) {
         globals.loader.load(
             url,
             (gltf) => {
-
                 const animations = gltf.animations;
                 const model = gltf.scene;
                 let mixer = null;
@@ -24,7 +22,6 @@ export function loadModel(url) {
                     if (node.isMesh)
                         node.castShadow = true;
                 });
-                globals.gameScene.scene.add(model);
                 resolve(model);
             },
             undefined,

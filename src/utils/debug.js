@@ -1,7 +1,5 @@
-import { Pane } from 'tweakpane';
-import * as THREE from 'three/webgpu';
+import { THREE, Pane, Stats } from '../imports/imports';
 import { globals } from '../core/globals';
-import Stats from 'three/examples/jsm/libs/stats.module'
 
 export class Debug {
     constructor() {
@@ -60,7 +58,7 @@ export class Debug {
             topColor: '#9ec3ff',
         };
 
-        folder.addBinding({ globalLightColor: "#ffe89e" }, 'globalLightColor', {
+        folder.addBinding({ globalLightColor: "#ff9191" }, 'globalLightColor', {
             picker: 'inline',
         }).on('change', (e) => {
             const hexColor = e.value.replace('#', '');
@@ -72,7 +70,7 @@ export class Debug {
         folder.addBinding(PARAMS, 'topColor', {
             picker: 'inline',
         }).on('change', (e) => {
-            const hexColor = e.value.replace('#', '');
+            const hexColor = e.value.replace('#ff9191', '');
             const colorValue = parseInt(hexColor.substring(0, 6), 16);
 
             globals.light.hemisphere.color = new THREE.Color(colorValue);
@@ -84,7 +82,7 @@ export class Debug {
         folder.addBinding(PARAMS, 'bottomColor', {
             picker: 'inline',
         }).on('change', (e) => {
-            const hexColor = e.value.replace('#', '');
+            const hexColor = e.value.replace('#ffbcbc', '');
             const colorValue = parseInt(hexColor.substring(0, 6), 16);
 
             globals.light.hemisphere.groundColor = new THREE.Color(colorValue);
@@ -150,8 +148,8 @@ export class Debug {
             }
         }).on('change', (e) => {
 
-            light.shadow.mapSize.width = globals.shadow.mapSize.width;
-            light.shadow.mapSize.height = globals.shadow.mapSize.height;
+            globals.light.directionalGlobalLight.shadow.mapSize.width = globals.shadow.mapSize.width;
+            globals.light.directionalGlobalLight.shadow.mapSize.height = globals.shadow.mapSize.height;
         });
         folder.expanded = false;
     }

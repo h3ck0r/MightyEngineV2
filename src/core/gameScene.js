@@ -1,10 +1,11 @@
-import * as THREE from 'three/webgpu';
+import { THREE } from '../imports/imports.js';
 
 import { playAnimation } from '../utils/animation.js'
 import { globals } from './globals.js';
 import { loadModel } from '../utils/modelLoader.js';
 import { generateBushes } from '../mesh/bush.js';
 import { generateGrass, updateGrassPosition } from '../mesh/grass.js';
+import { loadRocks } from '../mesh/rocks.js';
 
 export class GameScene {
     constructor() {
@@ -18,17 +19,24 @@ export class GameScene {
 
     async loadScene() {
 
-        await loadModel('./models/playerModel.glb').then(model => {
+        const playerModelPromise = loadModel('./models/playerModelOpt.glb').then(model => {
             this.playerModel = model;
             playAnimation(this.playerModel, 'LongIdle');
         });
-        await generateBushes();
+        const houseModelPromise = loadModel('./models/house.glb').then(model => {
+            this.houseModel = model;
+        });
+        const runeRockModelPromise = loadModel('./models/runeRock.glb').then(model => {
+            this.runeRock = model;
+        });
+        const bushesPromise = generateBushes();
+        const rocksPromise = loadRocks();
+        const grassPromise = generateGrass();
 
-        this.grassFieldSize = 30;
-        const { grassMesh, coordinates } = generateGrass();
-        this.grass = grassMesh;
-        this.grassCoordinates = coordinates;
-        globals.gameScene.scene.add(this.grass);
+        await Promise.all([playerModelPromise, runeRockModelPromise, bushesPromise, houseModelPromise, rocksPromise, grassPromise]);
+        globals.gameScene.scene.add(this.playerModel);
+        globals.gameScene.scene.add(this.houseModel);
+        globals.gameScene.scene.add(this.runeRock);
     }
 
 }

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "r3f-perf": "^7.2.3",
+    "simplex-noise": "^4.0.3",
     "three": "^0.174.0",
     "three-nodes": "^0.0.0",
     "tweakpane": "^4.0.5"

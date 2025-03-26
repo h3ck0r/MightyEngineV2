@@ -1,7 +1,4 @@
-import * as THREE from 'three/webgpu';
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { uv, sin, texture, time, vec3, mod, vec2, normalWorld, positionWorld, color, positionLocal } from 'three/tsl';
-import { mx_noise_vec3 } from 'three/src/nodes/TSL.js';
+import { THREE, mergeGeometries, uv, sin, texture, time, vec3, mod, vec2, normalWorld, positionWorld, color, positionLocal } from '../imports/imports';
 
 import { globals } from '../core/globals';
 
@@ -13,13 +10,13 @@ export async function generateBush() {
             const plane = new THREE.PlaneGeometry(1, 1);
             planes.push(plane);
 
-            const scaleX = Math.random() * 0.5 + 1; 
+            const scaleX = Math.random() * 0.5 + 1;
             const scaleY = Math.random() * 0.5 + 1;
             const scaleZ = Math.random() * 0.5 + 1;
             plane.scale(scaleX, scaleY, scaleZ);
-            
+
             const sphericalPosition = new THREE.Spherical(
-                1 - Math.pow(Math.random(), 3)*0.1,
+                1 - Math.pow(Math.random(), 3) * 0.1,
                 Math.PI * 2 * Math.random(),
                 Math.PI * Math.random()
             );
@@ -61,11 +58,11 @@ export async function generateBush() {
         color: 0xbdeb34,
         // side: THREE.DoubleSide,
         alphaMap: alphaMap,
-        transparent: true,
-        opacity: 1.0,
+        // transparent: true,
+        // opacity: 1.0,
         alphaTest: 0.1,
         depthTest: true,
-        depthWrite: false,
+        depthWrite: true,
     });
     const perlinUV = positionWorld.xz.mul(1).add(sin(time).mul(0.2));
     const perlinColor = texture(globals.noiseTexture, perlinUV).sub(0.5).mul(positionWorld.y);
@@ -78,16 +75,16 @@ export async function generateBush() {
     highLODMesh.shadowBias = 0.05;
     highLODMesh.position.set(0, 1, 0);
 
-    const lowLODObject = new THREE.Object3D(); 
+    const lowLODObject = new THREE.Object3D();
     lod.addLevel(lowLODObject, 70);
     lod.addLevel(highLODMesh, 0);
 
-    
+
     return highLODMesh;
 }
 export async function generateBushes() {
     const bushPrototype = await generateBush();
-    const count = 400;
+    const count = 100;
     const range = 100;
 
     const bushGeometry = bushPrototype.geometry;

@@ -1,104 +1,63 @@
-import * as THREE from 'three/webgpu';
-import { mix, positionWorld, cross, dot, normalize, If, smoothstep, float, hash, mod, Loop, mul, Fn, vec3, add, uniform, sin, time, texture, positionLocal, fract, mat3, sub, modelViewMatrix, length } from 'three/tsl';
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { THREE, uniform, smoothstep, Fn, mix, mergeGeometries, uv, sin, texture, time, vec3, mod, vec2, normalWorld, positionWorld, color, positionLocal } from '../imports/imports';
 
 import { globals } from '../core/globals';
-import { generateNoiseTexture } from '../utils/noise';
-
 
 const cameraPos = uniform(globals.camera.camera.position);
 
-export function generateGrass(size = 1000, maxRange = 20) {
-    const coordinates = [];
-    const grasses = [];
 
-    for (let i = 0; i < size; i++) {
-        const row = [];
-        for (let j = 0; j < size; j++) {
-            const x = Math.random() * (maxRange + maxRange) - maxRange;
-            const z = Math.random() * (maxRange + maxRange) - maxRange;
 
-            const grassGeometry = new THREE.BufferGeometry();
-            grasses.push(grassGeometry);
-
-            const bladeHeight = Math.random() + 0.2;
-            const vertices = new Float32Array([
-                0, 0, 0,
-                0, bladeHeight, 0,
-                0.07, bladeHeight * 0.8, 0,
-            ]);
-
-            grassGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-
-            const positionAttribute = grassGeometry.getAttribute('position');
-
-            const yAngle = Math.random() * Math.PI * 2;
-            const tiltAngle = (Math.random() * 0.4) - 0.2;
-
-            const rotationMatrix = new THREE.Matrix4();
-            rotationMatrix.makeRotationY(yAngle);
-            const tiltMatrix = new THREE.Matrix4().makeRotationAxis(
-                new THREE.Vector3(Math.cos(yAngle), 0, Math.sin(yAngle)),
-                tiltAngle
-            );
-            rotationMatrix.multiply(tiltMatrix);
-
-            for (let k = 0; k < positionAttribute.count; k++) {
-                const vertex = new THREE.Vector3(
-                    positionAttribute.getX(k),
-                    positionAttribute.getY(k),
-                    positionAttribute.getZ(k)
-                );
-
-                vertex.applyMatrix4(rotationMatrix);
-
-                // Apply position after rotation
-                positionAttribute.setXYZ(k, vertex.x + x, vertex.y, vertex.z + z);
-            }
-
-            row.push({ x, z });
-        }
-        coordinates.push(row);
-    }
-    const grassMaterial = new THREE.MeshStandardNodeMaterial({
-        
+export async function generateGrass(count = 100000, maxRange = 50) {
+    const grassGeometry = new THREE.PlaneGeometry(2, 1.5);
+    const alphaMap = new THREE.TextureLoader().load('textures/grassAlpha.webp');
+    const grassMaterial = new THREE.MeshStandardMaterial({
+        alphaMap: alphaMap,
+        // transparent: true,
+        // opacity: 1.0,
+        side: THREE.DoubleSide,
+        alphaTest: 0.05,
+        depthWrite: true,
+        depthTest: true,
     });
+    const bottomColor = new THREE.Color(0x8fc906);
+    const middleColor = new THREE.Color(0xb5f029);
+    const topColor = new THREE.Color(0xdaff82);
+
+    const middleBlend = smoothstep(0.0, 0.5, positionWorld.y);
+
+    const topBlend = smoothstep(0.5, 1.0, positionWorld.y);
+
     grassMaterial.colorNode = mix(
-        new THREE.Color(0x162100),
-        new THREE.Color(0xa8fc0d),
+        mix(bottomColor, middleColor, middleBlend),
+        mix(middleColor, topColor, topBlend),
         smoothstep(0.0, 1.0, positionWorld.y)
     );
 
-    const billboard = Fn(() => {
-        const localPos = positionLocal.toVar();
-        const worldPos = positionWorld.toVar();
-        const toCamera = normalize(sub(cameraPos, worldPos));
-        const up = vec3(0.0, 1.0, 0.0);
-        const right = normalize(cross(up, toCamera));
-        const trueUp = cross(toCamera, right);
+    const instancedMesh = new THREE.InstancedMesh(grassGeometry, grassMaterial, count);
+    const matrix = new THREE.Matrix4();
+    const tempQuaternion = new THREE.Quaternion();
+    const tempPosition = new THREE.Vector3();
+    const tempScale = new THREE.Vector3(1, 1, 1);
+    for (let i = 0; i < count; i++) {
+        const x = Math.random() * (maxRange + maxRange) - maxRange - 20;
+        const z = Math.random() * (maxRange + maxRange) - maxRange - 20;
 
-        const rotationMatrix = mat3(
-            right,
-            trueUp,
-            toCamera
-        );
-        const scaleVec = vec3(
-            length(vec3(modelViewMatrix[0].x, modelViewMatrix[0].y, modelViewMatrix[0].z)),
-            length(vec3(modelViewMatrix[1].x, modelViewMatrix[1].y, modelViewMatrix[1].z)),
-            length(vec3(modelViewMatrix[2].x, modelViewMatrix[2].y, modelViewMatrix[2].z))
-        );
-        const rotatedPos = mul(rotationMatrix, mul(localPos, scaleVec));
+        const randomScale = Math.random() * 0.5 + 0.75;
+        tempPosition.set(x, 0, z);
+        tempScale.set(randomScale, randomScale, randomScale);
 
-        return add(worldPos, rotatedPos);
-    });
+        const randomRotation = Math.random() * Math.PI * 2; 
+        tempQuaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), randomRotation); 
 
-    // grassMaterial.positionNode = billboard();
-    const grassMesh = new THREE.Mesh(mergeGeometries(grasses), grassMaterial);
+        matrix.compose(tempPosition, tempQuaternion, tempScale);
+        instancedMesh.setMatrixAt(i, matrix);
+    }
 
-    return { grassMesh, coordinates };
+
+    instancedMesh.instanceMatrix.needsUpdate = true;
+    instancedMesh.receiveShadow = true;
+
+    globals.gameScene.scene.add(instancedMesh);
 }
-
-
 
 export function updateGrassPosition(grassMesh) {
     cameraPos.value.copy(globals.camera.camera.position);

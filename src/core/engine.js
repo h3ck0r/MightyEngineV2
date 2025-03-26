@@ -1,9 +1,4 @@
-import * as THREE from 'three/webgpu';
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
-import { KTX2Loader } from 'three/examples/jsm/Addons.js';
-import { pass, renderOutput } from 'three/tsl'
-import { sobel } from 'three/addons/tsl/display/SobelOperatorNode.js';
-
+import { THREE, MeshoptDecoder, KTX2Loader } from '../imports/imports.js';
 
 import { globals } from './globals.js';
 import { setupLights } from './lights.js';
@@ -24,39 +19,35 @@ export class Engine {
         globals.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         globals.gameScene = new GameScene();
 
-        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshPhongMaterial({ color: 0xcbcbcb, depthWrite: false }));
+        const mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(1000, 1000),
+            new THREE.MeshStandardMaterial({ color: 0xa8fc0d }));
         mesh.rotation.x = - Math.PI / 2;
         mesh.receiveShadow = true;
         globals.gameScene.scene.add(mesh);
 
-        globals.textureLoader.load("/textures/noiseTexture.webp", ((texture) =>
-            globals.noiseTexture = texture
-        ));
-
+        
         globals.camera.camera.far = 120;
-
-        // this.postProcessing = new THREE.PostProcessing(globals.renderer)
-        // this.postProcessing.outputColorTransform = false
-
-        // const scenePass = pass(globals.gameScene.scene, globals.camera.camera)
-        // const outputPass = renderOutput(scenePass)
-
-        // this.postProcessing.outputNode = sobel(outputPass)
-
         document.body.appendChild(globals.renderer.domElement);
     }
 
 
     async init() {
         await globals.renderer.hasFeatureAsync();
-
+        await globals.textureLoader.loadAsync("/textures/noiseTexture.webp")
+            .then((texture) => {
+                globals.noiseTexture = texture;
+            })
+            .catch((error) => {
+                console.error("Failed to load texture:", error);
+            });
         const ktx2Loader = new KTX2Loader();
         ktx2Loader.setTranscoderPath("/libs/basis/");
         ktx2Loader.detectSupport(globals.renderer);
         ktx2Loader.setWorkerLimit(navigator.hardwareConcurrency || 4);
         globals.loader.setKTX2Loader(ktx2Loader);
         globals.loader.setMeshoptDecoder(MeshoptDecoder);
-        
+
         await globals.gameScene.loadScene();
         setupEventListeners(globals.renderer, globals.controls);
         setupLights();

@@ -1,5 +1,4 @@
-import * as THREE from 'three/webgpu';
-import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
+import { THREE, PointerLockControls } from '../imports/imports.js';
 
 import { globals } from './globals.js';
 import { playAnimation } from '../utils/animation.js';
